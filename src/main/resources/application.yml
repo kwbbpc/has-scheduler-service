@@ -1,0 +1,8 @@
+server:
+  port: 9000
+
+messaging:
+  - weather: 0
+  - motion: 1
+  - watering: 3
+
