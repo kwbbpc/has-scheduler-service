@@ -10,6 +10,7 @@ public class Scheduler {
 
         // check db for scheduled timing information
 
+
         // are we under an active delay?
             //exit early
 
