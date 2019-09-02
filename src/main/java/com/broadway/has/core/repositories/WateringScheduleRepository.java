@@ -1,14 +1,16 @@
 package com.broadway.has.core.repositories;
 
-import org.socialsignin.spring.data.dynamodb.repository.EnableScan;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
 
 
-@EnableScan
 public interface WateringScheduleRepository extends
-        CrudRepository<ScheduleDao, String> {
+        MongoRepository<ScheduleDao, String> {
 
-    List<ScheduleDao> findById(String id);
+    //List<ScheduleDao> findById(String id);
+
+    //public ScheduleDao findByDay(int dayOfWeek);
+
+    List<ScheduleDao> findAllByDayOfWeek(int dayOfWeek);
 }

@@ -1,10 +1,14 @@
 package com.broadway.has.core.repositories;
 
 
-import com.amazonaws.services.dynamodbv2.datamodeling.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@DynamoDBTable(tableName = "WateringSchedule")
+@Document(collection = "wateringSchedules")
 public class ScheduleDao {
+
+    @Id
+    private String id;
 
     private int valveNumber;
     private int runTimeMs;
@@ -12,12 +16,10 @@ public class ScheduleDao {
     private int hourOfDay;
     private int minuteOfDay;
 
-    @DynamoDBHashKey
     public int getValveNumber() {
         return valveNumber;
     }
 
-    @DynamoDBRangeKey
     public int getDayOfWeek() {
         return dayOfWeek;
     }
