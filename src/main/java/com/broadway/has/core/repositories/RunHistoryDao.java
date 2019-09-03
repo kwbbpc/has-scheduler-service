@@ -10,12 +10,12 @@ import java.util.Date;
 @Document(collection = "wateringRunHistory")
 public class RunHistoryDao {
 
-    int dayRun;
-    int hourRun;
-    int valveNumber;
-    int runTimeMs;
-    String runReason;
-    Date executionTime;
+    private int dayRun;
+    private int hourRun;
+    private int valveNumber;
+    private int runTimeMs;
+    private String runReason;
+    private Date executionTime;
 
 
     @Id

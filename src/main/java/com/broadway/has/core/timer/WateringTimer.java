@@ -2,10 +2,7 @@ package com.broadway.has.core.timer;
 
 import com.broadway.has.core.commander.Commander;
 import com.broadway.has.core.commander.WateringRequest;
-import com.broadway.has.core.repositories.RunHistoryDao;
-import com.broadway.has.core.repositories.RunHistoryRepository;
-import com.broadway.has.core.repositories.ScheduleDao;
-import com.broadway.has.core.repositories.WateringScheduleRepository;
+import com.broadway.has.core.repositories.*;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +22,9 @@ public class WateringTimer {
 
     @Autowired
     RunHistoryRepository runHistoryRepository;
+
+    @Autowired
+    DelayWateringRepository delayWateringRepository;
 
     @Autowired
     Commander xbeeCommander;
@@ -66,12 +66,19 @@ public class WateringTimer {
         for(ScheduleDao schedule : schedules){
 
                 if(fuzzyDoesTimestampMatch(2, date, schedule)) {
+
+                    //is there an active delay for this valve?
+                    if(isDelayed(schedule.getValveNumber())){
+                        //user notification and logging occurs within the delay check
+                        continue;
+                    }
+
                     //has watering already executed for this time?
                     RunHistoryDao runHistory = runHistoryRepository.findByDayRunAndHourRunAndValveNumber(schedule.getDayOfWeek(), schedule.getHourOfDay(), schedule.getValveNumber());
 
                     if(runHistory != null){
                         //don't run
-                        return;
+                        continue;
                     }else{
 
                         try {
@@ -96,6 +103,25 @@ public class WateringTimer {
                 }
 
         }
+    }
+
+    private boolean isDelayed(int valveNumber){
+        //get any delays for this valve number
+        DelayDao delay = delayWateringRepository.findByValveNumberAndDelayEndTimestampGreaterThan(valveNumber, DateTime.now().toDate());
+
+        boolean isDelayed = (delay != null);
+
+        if(isDelayed){
+            if(!delay.isUserNotified()){
+                logger.info("Watering will be delayed on valve {} until {}", valveNumber, delay.getDelayEndTimestamp());
+                //TODO: notify user
+                delay.setUserNotified(true);
+                delay.setUserNotifiedTimestamp(DateTime.now().toDate());
+                delayWateringRepository.save(delay);
+            }
+        }
+
+        return isDelayed;
     }
 
 

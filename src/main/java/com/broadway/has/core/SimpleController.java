@@ -1,7 +1,9 @@
 package com.broadway.has.core;
 
 import com.broadway.has.core.httpexceptions.InvalidJsonResponseError;
+import com.broadway.has.core.repositories.DelayWateringRepository;
 import com.broadway.has.core.repositories.WateringScheduleRepository;
+import com.broadway.has.core.requests.DelayRequest;
 import com.broadway.has.core.requests.WaterSchedule;
 import com.broadway.has.core.responses.WateringScheduleResponse;
 import com.broadway.has.core.scheduler.Scheduler;
@@ -36,6 +38,8 @@ public class SimpleController {
     @Autowired
     private WateringScheduleRepository wateringScheduleRepository;
 
+    @Autowired
+    private DelayWateringRepository delayWateringRepository;
 
     @Value("$spring.application.name}")
     String appName;
@@ -76,14 +80,12 @@ public class SimpleController {
      * Given a delay period (start - stop) save it to the db for delaying any watering
      */
     @PostMapping("/scheduler/delay")
-    public Map<String, String> delayWateringTask(){
+    public ResponseEntity delayWateringTask(@ApiParam(value = "Delay specified scheduled watering until a provided date", required = true) @Valid @RequestBody DelayRequest delayRequest){
 
-        //parse out the request
+        scheduler.delayWatering(delayRequest);
 
-        //update the db with a delay/skip date
-        HashMap<String, String> test = new HashMap<>();
-        test.put("This", "that");
-        return test;
+        return new ResponseEntity(HttpStatus.OK);
+
     }
 
 }
