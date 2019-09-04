@@ -107,7 +107,7 @@ public class WateringTimer {
 
     private boolean isDelayed(int valveNumber){
         //get any delays for this valve number
-        DelayDao delay = delayWateringRepository.findByValveNumberAndDelayEndTimestampGreaterThan(valveNumber, DateTime.now().toDate());
+        DelayDao delay = delayWateringRepository.findOneByValveNumberAndDelayEndTimestampGreaterThan(valveNumber, DateTime.now().toDate());
 
         boolean isDelayed = (delay != null);
 

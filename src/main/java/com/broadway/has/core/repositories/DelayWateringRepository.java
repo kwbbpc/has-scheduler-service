@@ -8,7 +8,8 @@ import java.util.List;
 public interface DelayWateringRepository extends
         MongoRepository<DelayDao, String> {
 
-    DelayDao findByValveNumberAndDelayEndTimestampGreaterThan(int valveNumber, Date currentTime);
+    DelayDao findOneByValveNumberAndDelayEndTimestampGreaterThan(int valveNumber, Date currentTime);
 
+    List<DelayDao> findAllByValveNumberAndDelayEndTimestampGreaterThan(int valveNumber, Date currentTime);
 
 }

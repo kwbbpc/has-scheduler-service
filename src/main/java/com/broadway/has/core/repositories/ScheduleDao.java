@@ -1,6 +1,7 @@
 package com.broadway.has.core.repositories;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -10,11 +11,20 @@ public class ScheduleDao {
     @Id
     private String id;
 
+
     private int valveNumber;
     private int runTimeMs;
     private int dayOfWeek;
     private int hourOfDay;
     private int minuteOfDay;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public int getValveNumber() {
         return valveNumber;

@@ -2,6 +2,7 @@ package com.broadway.has.core.scheduler;
 
 import com.amazonaws.services.glue.model.Database;
 import com.broadway.has.core.httpexceptions.DatabaseError;
+import com.broadway.has.core.repositories.DelayDao;
 import com.broadway.has.core.repositories.DelayWateringRepository;
 import com.broadway.has.core.repositories.ScheduleDao;
 import com.broadway.has.core.repositories.WateringScheduleRepository;
@@ -13,7 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class Scheduler {
@@ -39,6 +43,30 @@ public class Scheduler {
 
     }
 
+    public void deleteDelay(String id){
+        try{
+            delayWateringRepository.deleteById(id);
+        }catch (Exception e){
+            logger.error("Error deleting delay: {}", e);
+            throw new DatabaseError();
+        }
+    }
+
+    public Map<Integer, List<DelayDao>> getDelays(Date fromThisTimeOn, List<Integer> valves){
+
+        Map<Integer, List<DelayDao>> delayMap = new HashMap<>();
+
+        for(Integer valve : valves){
+            List<DelayDao> delays = delayWateringRepository.findAllByValveNumberAndDelayEndTimestampGreaterThan(valve, fromThisTimeOn);
+            if(delays != null && !delays.isEmpty()){
+                delayMap.put(valve, delays);
+            }
+        }
+
+        return delayMap;
+
+    }
+
     public void saveNewSchedule(WaterSchedule waterScheduleRequest) throws DatabaseError{
 
 
@@ -53,6 +81,15 @@ public class Scheduler {
         }
 
 
+    }
+
+    public void deleteWatering(String id){
+        try{
+            wateringScheduleRepository.deleteById(id);
+        }catch (Exception e){
+            logger.error("Error deleting watering: {}", e);
+            throw new DatabaseError();
+        }
     }
 
     public WateringScheduleResponse getSchedule(){
