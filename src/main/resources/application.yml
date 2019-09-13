@@ -13,4 +13,4 @@ management.endpoints.web.exposure.include: "*"
 
 management.security.enabled: false
 
-commander.hostname: "localhost:9090"
+commander.hostname: "localhost:9999"
