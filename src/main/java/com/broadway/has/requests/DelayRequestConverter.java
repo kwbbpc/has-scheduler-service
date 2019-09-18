@@ -1,7 +1,6 @@
-package com.broadway.has.scheduler;
+package com.broadway.has.requests;
 
 import com.broadway.has.repositories.DelayDao;
-import com.broadway.has.requests.DelayRequest;
 import org.joda.time.DateTime;
 
 public class DelayRequestConverter {

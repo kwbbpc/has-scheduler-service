@@ -1,4 +1,4 @@
-package com.broadway.has.requests;
+package com.broadway.has.scheduler;
 
 import io.swagger.annotations.ApiModelProperty;
 

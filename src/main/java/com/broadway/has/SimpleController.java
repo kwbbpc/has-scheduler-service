@@ -4,7 +4,7 @@ import com.broadway.has.repositories.DelayDao;
 import com.broadway.has.repositories.DelayWateringRepository;
 import com.broadway.has.repositories.WateringScheduleRepository;
 import com.broadway.has.requests.DelayRequest;
-import com.broadway.has.requests.WaterSchedule;
+import com.broadway.has.scheduler.WaterSchedule;
 import com.broadway.has.scheduler.Scheduler;
 import com.broadway.has.httpexceptions.InvalidJsonResponseError;
 import com.broadway.has.responses.WateringScheduleResponse;

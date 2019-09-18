@@ -1,12 +1,13 @@
 package com.broadway.has.scheduler;
 
+import com.broadway.has.httpexceptions.DatabaseError;
 import com.broadway.has.repositories.DelayWateringRepository;
 import com.broadway.has.repositories.ScheduleDao;
 import com.broadway.has.repositories.WateringScheduleRepository;
-import com.broadway.has.requests.DelayRequest;
-import com.broadway.has.httpexceptions.DatabaseError;
 import com.broadway.has.repositories.DelayDao;
-import com.broadway.has.requests.WaterSchedule;
+import com.broadway.has.requests.DelayRequest;
+import com.broadway.has.requests.DelayRequestConverter;
+import com.broadway.has.requests.ScheduleRequestConverter;
 import com.broadway.has.responses.WateringScheduleResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -42,6 +42,7 @@ public class WateringTimer {
                 maxStartHour = maxStartHour - 24;
             }
 
+            int h = current.getHourOfDay();
             if(minStartHour <= current.getHourOfDay() && current.getHourOfDay() <= maxStartHour) {
                 return true;
             }
@@ -59,10 +60,8 @@ public class WateringTimer {
         //get the current day & time
         DateTime date = DateTime.now();
 
-        int dayOfWeek = 3;
-
         //pull schedule out of database for all schedules today
-        List<ScheduleDao> schedules = wateringScheduleRepository.findAllByDayOfWeek(dayOfWeek);
+        List<ScheduleDao> schedules = wateringScheduleRepository.findAllByDayOfWeek(date.getDayOfWeek());
 
         //"timestamp" definition is for this hour, allow +/- 2 hours
         for(ScheduleDao schedule : schedules){

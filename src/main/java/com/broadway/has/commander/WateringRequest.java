@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Objects;
 
 public class WateringRequest {
 
@@ -70,5 +71,28 @@ public class WateringRequest {
     }
 
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        WateringRequest that = (WateringRequest) o;
+        boolean eq = valveNumber == that.valveNumber &&
+                runTimeMs == that.runTimeMs &&
+                on == that.on;
 
+        if(xbeeAddr != null){
+            eq &= xbeeAddr.equals((((WateringRequest) o).xbeeAddr));
+        }
+
+        if(expirationTime != null){
+            eq &= expirationTime.equals(((WateringRequest) o).expirationTime);
+        }
+
+        return eq;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(valveNumber, runTimeMs, on, xbeeAddr, expirationTime);
+    }
 }

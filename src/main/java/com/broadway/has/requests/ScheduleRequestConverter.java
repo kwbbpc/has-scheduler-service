@@ -1,8 +1,8 @@
-package com.broadway.has.scheduler;
+package com.broadway.has.requests;
 
 import com.broadway.has.repositories.ScheduleDao;
-import com.broadway.has.requests.DaySchedule;
-import com.broadway.has.requests.WaterSchedule;
+import com.broadway.has.scheduler.DaySchedule;
+import com.broadway.has.scheduler.WaterSchedule;
 
 import java.util.ArrayList;
 import java.util.List;
