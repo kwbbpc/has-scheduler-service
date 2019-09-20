@@ -26,10 +26,10 @@ import java.util.Map;
 
 
 @Controller
-public class SimpleController {
+public class HasSchedulerController {
 
 
-    private static Logger logger = LoggerFactory.getLogger(SimpleController.class);
+    private static Logger logger = LoggerFactory.getLogger(HasSchedulerController.class);
 
     @Autowired
     private Scheduler scheduler;
@@ -58,7 +58,7 @@ public class SimpleController {
 
 
     /**
-     * Takes a SMTWTFS array with times to regularly execute watering
+     * Takes a SMTWTFS array with times to regularly execute watering.  Hours MUST be relative to system default (i.e. EST)
      * @return
      */
     @PostMapping(value = "/watering", produces = "application/json")

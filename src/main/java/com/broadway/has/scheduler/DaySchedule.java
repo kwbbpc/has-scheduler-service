@@ -56,4 +56,5 @@ public class DaySchedule {
     public void setRunTimeMs(Integer runTimeMs) {
         this.runTimeMs = runTimeMs;
     }
+
 }

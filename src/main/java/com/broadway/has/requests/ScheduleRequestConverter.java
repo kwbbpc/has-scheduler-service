@@ -3,6 +3,7 @@ package com.broadway.has.requests;
 import com.broadway.has.repositories.ScheduleDao;
 import com.broadway.has.scheduler.DaySchedule;
 import com.broadway.has.scheduler.WaterSchedule;
+import org.joda.time.DateTimeZone;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ public class ScheduleRequestConverter {
         for(DaySchedule day : schedule.getSchedule()){
 
             ScheduleDao scheduleDao = new ScheduleDao();
+            scheduleDao.setTimeZone(DateTimeZone.getDefault().toString());
             scheduleDao.setDayOfWeek(day.getDay());
             scheduleDao.setHourOfDay(day.getHours());
             scheduleDao.setMinuteOfDay(day.getMinutes());

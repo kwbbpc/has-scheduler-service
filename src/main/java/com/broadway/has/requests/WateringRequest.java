@@ -1,4 +1,4 @@
-package com.broadway.has.commander;
+package com.broadway.has.requests;
 
 import com.broadway.has.repositories.ScheduleDao;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -41,12 +41,16 @@ public class WateringRequest {
         this.runTimeMs = runTimeMs;
     }
 
-    public boolean getOn() {
+    public boolean isOn() {
         return on;
     }
 
-    public void setOn(boolean on) {
-        this.on = on;
+    public Date getExpirationTime() {
+        return expirationTime;
+    }
+
+    public void setExpirationTime(Date expirationTime) {
+        this.expirationTime = expirationTime;
     }
 
     public static WateringRequest fromJSON(String json)

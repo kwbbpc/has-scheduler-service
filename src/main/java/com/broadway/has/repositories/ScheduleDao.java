@@ -16,6 +16,7 @@ public class ScheduleDao {
     private int dayOfWeek;
     private int hourOfDay;
     private int minuteOfDay;
+    private String timeZone;
 
     public String getId() {
         return id;
@@ -63,5 +64,13 @@ public class ScheduleDao {
 
     public void setMinuteOfDay(int minuteOfDay) {
         this.minuteOfDay = minuteOfDay;
+    }
+
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
     }
 }

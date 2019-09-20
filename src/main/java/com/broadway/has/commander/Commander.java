@@ -1,5 +1,6 @@
 package com.broadway.has.commander;
 
+import com.broadway.has.requests.WateringRequest;
 import feign.Headers;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;

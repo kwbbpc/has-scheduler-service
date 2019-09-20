@@ -2,16 +2,19 @@ package com.broadway.has.timer;
 
 import com.broadway.has.repositories.WateringScheduleRepository;
 import com.broadway.has.commander.Commander;
-import com.broadway.has.commander.WateringRequest;
+import com.broadway.has.requests.WateringRequest;
 import com.broadway.has.repositories.*;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.ZoneId;
 import java.util.List;
+import java.util.TimeZone;
 
 @Component
 public class WateringTimer {
@@ -36,14 +39,15 @@ public class WateringTimer {
 
         if(scheduled.getDayOfWeek() == current.getDayOfWeek()) {
 
-            int minStartHour = scheduled.getHourOfDay();
-            int maxStartHour = scheduled.getHourOfDay() + hoursFuzzinessAllowance;
-            if(maxStartHour > 24) {
-                maxStartHour = maxStartHour - 24;
+            int currentHourOfDay = current.getHourOfDay();
+            if(current.getHourOfDay() < hoursFuzzinessAllowance){
+                currentHourOfDay += 24;
             }
 
-            int h = current.getHourOfDay();
-            if(minStartHour <= current.getHourOfDay() && current.getHourOfDay() <= maxStartHour) {
+            int minStartHour = scheduled.getHourOfDay();
+            int maxStartHour = scheduled.getHourOfDay() + hoursFuzzinessAllowance;
+
+            if(minStartHour <= currentHourOfDay && currentHourOfDay <= maxStartHour) {
                 return true;
             }
         }
@@ -58,7 +62,7 @@ public class WateringTimer {
     public void checkForWatering(){
 
         //get the current day & time
-        DateTime date = DateTime.now();
+        DateTime date = DateTime.now().withZone(DateTimeZone.forTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault())));
 
         //pull schedule out of database for all schedules today
         List<ScheduleDao> schedules = wateringScheduleRepository.findAllByDayOfWeek(date.getDayOfWeek());
@@ -87,7 +91,7 @@ public class WateringTimer {
                             xbeeCommander.sendCommand(WateringRequest.fromSchedule(schedule, "0"));
                         }catch (Exception e){
                             logger.error("Error executing http command to xbee commander: {}", e);
-                            //TODO: post to SQS instead with an expiration timer
+                            return;
                         }
 
 
