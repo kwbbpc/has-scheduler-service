@@ -3,16 +3,24 @@ package com.broadway.has.integration;
 import com.broadway.has.Application;
 import com.broadway.has.commander.Commander;
 import com.broadway.has.repositories.ScheduleDao;
+import com.broadway.has.requests.WateringRequest;
 import com.broadway.has.responses.WateringScheduleResponse;
 import com.broadway.has.scheduler.DaySchedule;
 import com.broadway.has.scheduler.Scheduler;
 import com.broadway.has.scheduler.WaterSchedule;
 import com.broadway.has.timer.WateringTimer;
 import org.jetbrains.annotations.Async;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeUtils;
+import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -42,12 +50,13 @@ import java.util.List;
 public class ITTestNewScheduleSave {
 
     @Autowired
+    @InjectMocks
     private WateringTimer wateringTimer;
 
     @Autowired
     private Scheduler scheduler;
 
-    @Autowired
+    @Mock
     private Commander commander;
 
 
@@ -160,15 +169,27 @@ public class ITTestNewScheduleSave {
     }
 
     @Test
-    public void TestSingleScheduleExecution(){
+    public void TestSingleScheduleExecution() throws Exception{
+
+
+        MockitoAnnotations.initMocks(this);
 
         WaterSchedule testSchedule = buildTestSchedule();
         scheduler.saveNewSchedule(testSchedule);
 
         //fix the current time so the schedule will execute
+        DaySchedule test = testSchedule.getSchedule().get(0);
+        DateTime testTime = new DateTime(2019, 1,7,test.getHours(),test.getMinutes(),13,13, DateTimeZone.forOffsetHours(-5));
+        testTime.getMillis();
+        DateTimeUtils.setCurrentMillisFixed(testTime.getMillis());
 
 
         wateringTimer.checkForWatering();
+        wateringTimer.checkForWatering();
+        wateringTimer.checkForWatering();
+
+        Mockito.verify(commander, Mockito.times(1)).sendCommand(Mockito.any(WateringRequest.class));
+
 
 
     }
