@@ -14,14 +14,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 
-@PrepareForTest({ DateTime.class })
 @RunWith(MockitoJUnitRunner.class)
 public class TestWateringTimer {
 
@@ -149,6 +147,17 @@ public class TestWateringTimer {
 
     }
 
+    public static RunHistoryDao testRunHistoryDao(DateTime testTime, int testValveNumber){
+        RunHistoryDao runHistoryDao = new RunHistoryDao();
+        runHistoryDao.setDayRun(testTime.getHourOfDay());
+        runHistoryDao.setExecutionTime(testTime.toDate());
+        runHistoryDao.setHourRun(testTime.getHourOfDay());
+        runHistoryDao.setRunTimeMs(10000000);
+        runHistoryDao.setValveNumber(testValveNumber);
+        runHistoryDao.setRunReason("test");
+        return runHistoryDao;
+    }
+
     @Test
     public void CheckForWateringSkipWhenRunHistoryAlreadyExists() throws IOException {
 
@@ -192,15 +201,73 @@ public class TestWateringTimer {
     @Test
     public void VerifyWateringHistoryGetsCreatedOnFirstRun(){
 
-    }
 
-    @Test
-    public void VerifyOnlyOneWateringRunHistoryIsCreated(){
+        int testValveNumber = 1;
+
+        DateTime testTime = new DateTime(2019, 1,6,13,13,13,13, DateTimeZone.forOffsetHours(-5));
+        DateTimeUtils.setCurrentMillisFixed(testTime.getMillis());
+
+        List<ScheduleDao> list = new ArrayList<>();
+        ScheduleDao dao = new ScheduleDao();
+        dao.setDayOfWeek(testTime.getDayOfWeek());
+        dao.setHourOfDay(testTime.getHourOfDay());
+        dao.setValveNumber(testValveNumber);
+        list.add(dao);
+
+
+        Mockito.when(
+                runHistoryRepository.findByDayRunAndHourRunAndValveNumber(
+                        testTime.getDayOfWeek(), testTime.getHourOfDay(), testValveNumber))
+                .thenReturn(null);
+        Mockito.when(wateringScheduleRepository.findAllByDayOfWeek(testTime.getDayOfWeek())).thenReturn(list);
+
+
+        //Run the test
+        timer.checkForWatering();
+
+        //Verify there was a new history created since this was our first run.
+        Mockito.verify(runHistoryRepository, Mockito.times(1)).save(Mockito.any(RunHistoryDao.class));
+
 
     }
 
     @Test
     public void VerifyWateringExecutionHappensOnlyOnce(){
+        int testValveNumber = 1;
 
+        DateTime testTime = new DateTime(2019, 1,6,13,13,13,13, DateTimeZone.forOffsetHours(-5));
+        DateTimeUtils.setCurrentMillisFixed(testTime.getMillis());
+
+        List<ScheduleDao> list = new ArrayList<>();
+        ScheduleDao dao = new ScheduleDao();
+        dao.setDayOfWeek(testTime.getDayOfWeek());
+        dao.setHourOfDay(testTime.getHourOfDay());
+        dao.setValveNumber(testValveNumber);
+        list.add(dao);
+
+
+        Mockito.when(
+                runHistoryRepository.findByDayRunAndHourRunAndValveNumber(
+                        testTime.getDayOfWeek(), testTime.getHourOfDay(), testValveNumber))
+                .thenReturn(null);
+        Mockito.when(wateringScheduleRepository.findAllByDayOfWeek(testTime.getDayOfWeek())).thenReturn(list);
+
+
+        //Run the test
+        timer.checkForWatering();
+
+        //watering has run, so now we need to return a valid history
+        Mockito.when(
+                runHistoryRepository.findByDayRunAndHourRunAndValveNumber(
+                        testTime.getDayOfWeek(), testTime.getHourOfDay(), testValveNumber))
+                .thenReturn(testRunHistoryDao(testTime, testValveNumber));
+
+        DateTimeUtils.setCurrentMillisFixed(testTime.getMillis() + 1);
+        timer.checkForWatering();
+        DateTimeUtils.setCurrentMillisFixed(testTime.getMillis() + 2);
+        timer.checkForWatering();
+
+        //Verify there was a new history created since this was our first run.
+        Mockito.verify(runHistoryRepository, Mockito.times(1)).save(Mockito.any(RunHistoryDao.class));
     }
 }

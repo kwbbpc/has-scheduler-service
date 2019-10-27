@@ -1,6 +1,8 @@
 package com.broadway.has.repositories;
 
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -72,5 +74,18 @@ public class ScheduleDao {
 
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
+    }
+
+    @Override
+    public String toString() {
+        return "ScheduleDao{" +
+                "id='" + id + '\'' +
+                ", valveNumber=" + valveNumber +
+                ", runTimeMs=" + runTimeMs +
+                ", dayOfWeek=" + dayOfWeek +
+                ", hourOfDay=" + hourOfDay +
+                ", minuteOfDay=" + minuteOfDay +
+                ", timeZone='" + timeZone + '\'' +
+                '}';
     }
 }

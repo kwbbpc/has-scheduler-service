@@ -35,6 +35,8 @@ public class WateringTimer {
 
     public static boolean fuzzyDoesTimestampMatch(int hoursFuzzinessAllowance, DateTime current, ScheduleDao scheduled){
 
+        logger.info("Comparing times current: {} vs scheduled: {}", current.toString(), scheduled.toString());
+
         int dayOfWeek = current.getDayOfWeek();
 
         if(scheduled.getDayOfWeek() == current.getDayOfWeek()) {
