@@ -81,6 +81,7 @@ public class WateringTimer {
                     }
 
                     //has watering already executed for this time?
+                    //TODO: check execution time to make sure this was on the same day, otherwise allow itl
                     RunHistoryDao runHistory = runHistoryRepository.findByDayRunAndHourRunAndValveNumber(schedule.getDayOfWeek(), schedule.getHourOfDay(), schedule.getValveNumber());
 
                     if(runHistory != null){
