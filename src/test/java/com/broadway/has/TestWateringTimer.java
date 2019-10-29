@@ -150,7 +150,7 @@ public class TestWateringTimer {
     public static RunHistoryDao testRunHistoryDao(DateTime testTime, int testValveNumber){
         RunHistoryDao runHistoryDao = new RunHistoryDao();
         runHistoryDao.setDayRun(testTime.getHourOfDay());
-        runHistoryDao.setExecutionTime(testTime.toDate());
+        runHistoryDao.setActualExecutionTime(testTime.toDate());
         runHistoryDao.setHourRun(testTime.getHourOfDay());
         runHistoryDao.setRunTimeMs(10000000);
         runHistoryDao.setValveNumber(testValveNumber);
@@ -176,7 +176,7 @@ public class TestWateringTimer {
 
         RunHistoryDao runHistoryDao = new RunHistoryDao();
         runHistoryDao.setDayRun(testTime.getHourOfDay());
-        runHistoryDao.setExecutionTime(testTime.toDate());
+        runHistoryDao.setActualExecutionTime(testTime.toDate());
         runHistoryDao.setHourRun(testTime.getHourOfDay());
         runHistoryDao.setRunTimeMs(10000000);
         runHistoryDao.setValveNumber(testValveNumber);

@@ -12,7 +12,7 @@ public class MongoConfig extends AbstractMongoConfiguration {
 
 
     @Value("${com.broadway.has.mongo.port}")
-    private String port;
+    private int port;
 
     @Value("${com.broadway.has.mongo.host}")
     private String host;
@@ -26,12 +26,28 @@ public class MongoConfig extends AbstractMongoConfiguration {
 
     @Override
     public MongoClient mongoClient() {
-        return new MongoClient(host, Integer.parseInt(port));
+        return new MongoClient(host, port);
     }
 
     @Override
     protected String getMappingBasePackage() {
         return "com.broadway.has.core";
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
     }
 }
 

@@ -9,10 +9,12 @@ import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -32,6 +34,9 @@ public class WateringTimer {
 
     @Autowired
     Commander xbeeCommander;
+
+    //@Value("{$watering.timer.timeWindowInHours")
+    private Integer hoursFuzzyAllowance = 2;
 
     public static boolean fuzzyDoesTimestampMatch(int hoursFuzzinessAllowance, DateTime current, ScheduleDao scheduled){
 
@@ -72,7 +77,7 @@ public class WateringTimer {
         //"timestamp" definition is for this hour, allow +/- 2 hours
         for(ScheduleDao schedule : schedules){
 
-                if(fuzzyDoesTimestampMatch(2, date, schedule)) {
+                if(fuzzyDoesTimestampMatch(this.hoursFuzzyAllowance, date, schedule)) {
 
                     //is there an active delay for this valve?
                     if(isDelayed(schedule.getValveNumber())){
@@ -80,9 +85,37 @@ public class WateringTimer {
                         continue;
                     }
 
+                    //will there be a valve already running (or still running)?
+                    RunHistoryDao runAlreadyScheduled = runHistoryRepository.findByValveNumberAndProjectedCompletionTimeAfter(schedule.getValveNumber(), DateTime.now().toDate());
+                    if(runAlreadyScheduled != null){
+                        logger.warn("Multiple runs are scheduled for {} time frame! see conflicting scheduled runs: {}, {}", runAlreadyScheduled.getActualExecutionTime(),
+                                runAlreadyScheduled.getScheduleId(), schedule.getId());
+                        logger.warn("Run scheduled: {}, Conflicting Schedule: {}", runAlreadyScheduled.toString(), schedule.toString());
+                        continue;
+                    }
+
+                    //was a valve run within the last X hours?
+                    DateTime startWindow = DateTime.now().minusHours(hoursFuzzyAllowance);
+                    DateTime endWindow = DateTime.now().plusHours(hoursFuzzyAllowance);
+                    RunHistoryDao runRecently =
+                            runHistoryRepository.findOneByValveNumberAndActualExecutionTimeBetween(
+                                    schedule.getValveNumber(), startWindow.toDate(), endWindow.toDate());
+                    if(runRecently != null){
+                        logger.warn("A run was recently executed for valve {} at {} which is within the last {} hours of " +
+                                        "the configured time window for requested time to run of {}: {}",
+                                runRecently.getValveNumber(), runRecently.getActualExecutionTime(), hoursFuzzyAllowance,
+                                DateTime.now(), runRecently.toString());
+                        logger.warn("This run will be skipped for valve {} at requested schedule {}@{}:{} day {}",
+                                schedule.getValveNumber(), schedule.getId(), schedule.getHourOfDay(), schedule.getMinuteOfDay(),
+                                schedule.getDayOfWeek());
+                        continue;
+                    }
+
+
                     //has watering already executed for this time?
-                    //TODO: check execution time to make sure this was on the same day, otherwise allow itl
-                    RunHistoryDao runHistory = runHistoryRepository.findByDayRunAndHourRunAndValveNumber(schedule.getDayOfWeek(), schedule.getHourOfDay(), schedule.getValveNumber());
+                    //check the run history to see if it was this actual schedule record that was run, otherwise allow it
+                    RunHistoryDao runHistory = runHistoryRepository.findByScheduleIdAndExecutionMidnightDateId(schedule.getId(), DateTime.now().toDateTimeISO().toDateMidnight().toDate());
+
 
                     if(runHistory != null){
                         //don't run
@@ -101,11 +134,14 @@ public class WateringTimer {
                         //save new run history
                         RunHistoryDao newRunHistory = new RunHistoryDao();
                         newRunHistory.setDayRun(schedule.getDayOfWeek());
-                        newRunHistory.setExecutionTime(DateTime.now().toDate());
+                        newRunHistory.setActualExecutionTime(DateTime.now().toDate());
                         newRunHistory.setHourRun(schedule.getHourOfDay());
                         newRunHistory.setRunReason("Timer executed automatically");
                         newRunHistory.setRunTimeMs(schedule.getRunTimeMs());
                         newRunHistory.setValveNumber(schedule.getValveNumber());
+                        newRunHistory.setScheduleId(schedule.getId());
+                        newRunHistory.setExecutionMidnightDateId(DateTime.now().toDateTimeISO().toDateMidnight().toDate());
+                        newRunHistory.setProjectedCompletionTime(DateTime.now().plus(schedule.getRunTimeMs()).toDate());
                         runHistoryRepository.save(newRunHistory);
                     }
                 }

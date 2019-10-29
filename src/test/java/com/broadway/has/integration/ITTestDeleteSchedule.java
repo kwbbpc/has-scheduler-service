@@ -1,21 +1,19 @@
 package com.broadway.has.integration;
 
+
 import com.broadway.has.Application;
 import com.broadway.has.commander.Commander;
 import com.broadway.has.integration.common.TestUtils;
 import com.broadway.has.repositories.ScheduleDao;
-import com.broadway.has.requests.WateringRequest;
 import com.broadway.has.responses.WateringScheduleResponse;
-import com.broadway.has.scheduler.DaySchedule;
 import com.broadway.has.scheduler.Scheduler;
 import com.broadway.has.scheduler.WaterSchedule;
 import com.broadway.has.timer.WateringTimer;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeUtils;
-import org.joda.time.DateTimeZone;
 import org.junit.*;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
@@ -23,24 +21,24 @@ import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.GenericContainer;
 
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
-@ContextConfiguration(initializers = {ITTestNewScheduleSave.Initializer.class})
+@ContextConfiguration(initializers = {ITTestDeleteSchedule.Initializer.class})
 @EnableAutoConfiguration(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class, EmbeddedMongoAutoConfiguration.class})
 @ActiveProfiles(value = "test")
-public class ITTestNewScheduleSave {
+public class ITTestDeleteSchedule {
+
+
 
     @Autowired
     @InjectMocks
@@ -59,6 +57,7 @@ public class ITTestNewScheduleSave {
     @Before
     public void initMocks(){
         MockitoAnnotations.initMocks(this);
+        System.out.println("Mongo started on port " + mongoContainer.getMappedPort(27017));
     }
 
     @After
@@ -76,69 +75,31 @@ public class ITTestNewScheduleSave {
         }
     }
 
-    private static boolean CompareSchedules(DaySchedule daySchedule, ScheduleDao scheduleDao){
-        boolean equals = true;
-        equals &= daySchedule.getDay() == scheduleDao.getDayOfWeek();
-        equals &= daySchedule.getHours() == scheduleDao.getHourOfDay();
-        equals &= daySchedule.getMinutes() == scheduleDao.getMinuteOfDay();
-        equals &= daySchedule.getRunTimeMs() == scheduleDao.getRunTimeMs();
-
-        return equals;
-    }
-
-    private static boolean CompareSchedules(WateringScheduleResponse response, WaterSchedule expectedSchedule){
-
-        List<DaySchedule> expected = expectedSchedule.getSchedule();
-
-        for(DaySchedule expectedSingle : expected){
-
-            List<ScheduleDao> responseSchedules = response.getScheduleByDay(expectedSingle.getDay());
-
-            //find a matching schedule in the list
-            boolean match = false;
-            for(ScheduleDao singleResponse : responseSchedules){
-
-                if(CompareSchedules(expectedSingle, singleResponse)){
-                    match = true;
-                    break;
-                }
-
-            }
-
-            if(!match){
-                return false;
-            }
-
-        }
-
-        return true;
-
-    }
-
-
-
 
 
     @Test
-    public void TestNewScheduleSave(){
+    public void TestDeleteSchedule(){
+
 
         WaterSchedule testSchedule = TestUtils.buildTestSchedule();
-
         scheduler.saveNewSchedule(testSchedule);
 
+        //verify there's 3 schedules
         WateringScheduleResponse r = scheduler.getSchedule();
+        int x = r.getAllSchedules().size();
+        Assert.assertTrue("Expected number of schedules was not created.", r.getAllSchedules().size() == 3);
+        List<String> ids = r.getAllSchedules().stream().map(ScheduleDao::getId).collect(Collectors.toList());
 
-        Assert.assertTrue("Fetched schedules don't match the ones that were saved", CompareSchedules(r, testSchedule));
+        //delete a watering
+        ScheduleDao s = r.getScheduleByDay(1).get(0);
+        scheduler.deleteWatering(s.getId());
+        String deletedId = s.getId();
 
+        //verify it was deleted
+        WateringScheduleResponse r2 = scheduler.getSchedule();
+        Assert.assertTrue("Expected number of schedules was not created.", r2.getAllSchedules().size() == 2);
+        List<String> idsAfterDelete = r2.getAllSchedules().stream().map(ScheduleDao::getId).collect(Collectors.toList());
+        Assert.assertFalse(idsAfterDelete.contains(deletedId));
 
     }
-
-
-
-
-
-
-
-
-
 }

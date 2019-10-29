@@ -9,16 +9,51 @@ import java.util.Date;
 @Document(collection = "wateringRunHistory")
 public class RunHistoryDao {
 
+    private String scheduleId;
+    private Date executionMidnightDateId;
     private int dayRun;
     private int hourRun;
     private int valveNumber;
     private int runTimeMs;
     private String runReason;
-    private Date executionTime;
+    private Date actualExecutionTime;
+    private Date projectedCompletionTime;
 
 
     @Id
     private String id;
+
+    public Date getProjectedCompletionTime() {
+        return projectedCompletionTime;
+    }
+
+    public void setProjectedCompletionTime(Date projectedCompletionTime) {
+        this.projectedCompletionTime = projectedCompletionTime;
+    }
+
+    public Date getExecutionMidnightDateId() {
+        return executionMidnightDateId;
+    }
+
+    public void setExecutionMidnightDateId(Date executionMidnightDateId) {
+        this.executionMidnightDateId = executionMidnightDateId;
+    }
+
+    public String getScheduleId() {
+        return scheduleId;
+    }
+
+    public void setScheduleId(String scheduleId) {
+        this.scheduleId = scheduleId;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public int getDayRun() {
         return dayRun;
@@ -60,11 +95,11 @@ public class RunHistoryDao {
         this.runReason = runReason;
     }
 
-    public Date getExecutionTime() {
-        return executionTime;
+    public Date getActualExecutionTime() {
+        return actualExecutionTime;
     }
 
-    public void setExecutionTime(Date executionTime) {
-        this.executionTime = executionTime;
+    public void setActualExecutionTime(Date actualExecutionTime) {
+        this.actualExecutionTime = actualExecutionTime;
     }
 }
