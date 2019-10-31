@@ -19,6 +19,10 @@ import java.util.List;
 public class TestUtils {
 
 
+   public static int hoursToMs(double hours){
+      return (int)(hours * 3600000);
+   }
+
    public static WaterSchedule buildSingleSchedule(int valve, int day, int hour, int minute, int runTimeMs){
 
       DaySchedule d = new DaySchedule();
@@ -57,7 +61,7 @@ public class TestUtils {
    public static DelayRequest delayWatering(DateTime currentTime, int delayTimeMs, int valveToDelay, String reason, Scheduler scheduler){
       DelayRequest delay = new DelayRequest();
       delay.setValveNumber(3);
-      DateTime delayTime = currentTime.plusHours(1);
+      DateTime delayTime = currentTime.plusMillis(delayTimeMs);
       delay.setDelayUntilTimestamp(delayTime.toDate());
       delay.setReason(reason);
 

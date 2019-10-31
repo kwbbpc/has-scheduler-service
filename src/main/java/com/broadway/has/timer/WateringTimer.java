@@ -9,12 +9,10 @@ import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -151,9 +149,10 @@ public class WateringTimer {
 
     private boolean isDelayed(int valveNumber){
         //get any delays for this valve number
-        DelayDao delay = delayWateringRepository.findOneByValveNumberAndDelayEndTimestampGreaterThan(valveNumber, DateTime.now().toDate());
+        DelayDao delay = delayWateringRepository.findFirstByValveNumberAndDelayEndTimestampGreaterThan(valveNumber, DateTime.now().toDate());
 
         boolean isDelayed = (delay != null);
+        logger.debug("Valve is on delay at {}: {}", DateTime.now().toDateTimeISO().toString(), isDelayed);
 
         if(isDelayed){
             if(!delay.isUserNotified()){
