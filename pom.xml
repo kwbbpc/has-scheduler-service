@@ -4,7 +4,7 @@
 
     <groupId>com.broadway.has.scheduler</groupId>
     <artifactId>has-scheduler-service</artifactId>
-    <version>1.0</version>
+    <version>1.0-SNAPSHOT</version>
 
 
     <parent>
