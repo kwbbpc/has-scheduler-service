@@ -17,6 +17,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -183,8 +184,7 @@ public class TestWateringTimer {
         runHistoryDao.setRunReason("test");
 
         Mockito.when(
-                runHistoryRepository.findByDayRunAndHourRunAndValveNumber(
-                        testTime.getDayOfWeek(), testTime.getHourOfDay(), testValveNumber))
+                runHistoryRepository.findByScheduleIdAndExecutionMidnightDateId(Mockito.any(String.class), Mockito.any(Date.class)))
                 .thenReturn(runHistoryDao);
         Mockito.when(wateringScheduleRepository.findAllByDayOfWeek(testTime.getDayOfWeek())).thenReturn(list);
 
@@ -216,8 +216,7 @@ public class TestWateringTimer {
 
 
         Mockito.when(
-                runHistoryRepository.findByDayRunAndHourRunAndValveNumber(
-                        testTime.getDayOfWeek(), testTime.getHourOfDay(), testValveNumber))
+                runHistoryRepository.findByScheduleIdAndExecutionMidnightDateId(Mockito.anyString(), Mockito.any(Date.class)))
                 .thenReturn(null);
         Mockito.when(wateringScheduleRepository.findAllByDayOfWeek(testTime.getDayOfWeek())).thenReturn(list);
 
@@ -247,8 +246,7 @@ public class TestWateringTimer {
 
 
         Mockito.when(
-                runHistoryRepository.findByDayRunAndHourRunAndValveNumber(
-                        testTime.getDayOfWeek(), testTime.getHourOfDay(), testValveNumber))
+                runHistoryRepository.findByScheduleIdAndExecutionMidnightDateId(Mockito.anyString(), Mockito.any(Date.class)))
                 .thenReturn(null);
         Mockito.when(wateringScheduleRepository.findAllByDayOfWeek(testTime.getDayOfWeek())).thenReturn(list);
 
@@ -258,8 +256,7 @@ public class TestWateringTimer {
 
         //watering has run, so now we need to return a valid history
         Mockito.when(
-                runHistoryRepository.findByDayRunAndHourRunAndValveNumber(
-                        testTime.getDayOfWeek(), testTime.getHourOfDay(), testValveNumber))
+                runHistoryRepository.findByScheduleIdAndExecutionMidnightDateId(Mockito.anyString(), Mockito.any(Date.class)))
                 .thenReturn(testRunHistoryDao(testTime, testValveNumber));
 
         DateTimeUtils.setCurrentMillisFixed(testTime.getMillis() + 1);
