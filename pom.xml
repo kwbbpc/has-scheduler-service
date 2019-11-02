@@ -13,6 +13,28 @@
         <version>2.1.7.RELEASE</version>
     </parent>
 
+    <properties>
+        <artifactrepo.url>mdthunder-artifacts-repo</artifactrepo.url>
+        <docker.image.prefix>mdthunder</docker.image.prefix>
+    </properties>
+    <scm>
+        <developerConnection>scm:git:https://github.com/kwbbpc/has-scheduler-service.git</developerConnection>
+        <tag>has-scheduler-service-1.0</tag>
+    </scm>
+
+
+    <distributionManagement>
+        <repository>
+            <id>s3.artifacts.release</id>
+            <url>s3://${artifactrepo.url}/release</url>
+        </repository>
+        <snapshotRepository>
+            <id>s3.artifacts.snapshot</id>
+            <url>s3://${artifactrepo.url}/snapshot</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -158,63 +180,71 @@
 
     </dependencies>
 
-    <properties>
-        <docker.image.prefix>mdthunder</docker.image.prefix>
-    </properties>
-    <scm>
-        <developerConnection>scm:git:https://github.com/kwbbpc/has-scheduler-service.git</developerConnection>
-      <tag>has-scheduler-service-1.0</tag>
-  </scm>
+    <build>
+        <extensions>
+            <extension>
+                <groupId>org.kuali.maven.wagons</groupId>
+                <artifactId>maven-s3-wagon</artifactId>
+                <version>1.2.1</version>
+            </extension>
+        </extensions>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
 
-        <build>
-            <plugins>
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                </plugin>
+            <!-- Release plugin and auto-versioning -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+            </plugin>
 
-                <!-- Release plugin and auto-versioning -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.3</version>
-                </plugin>
+            <!-- DOCKER building -->
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>1.4.9</version>
+                <configuration>
+                    <repository>${docker.image.prefix}/${project.artifactId}</repository>
+                    <tag>${project.version}</tag>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
-                <!-- DOCKER building -->
-                <plugin>
-                    <groupId>com.spotify</groupId>
-                    <artifactId>dockerfile-maven-plugin</artifactId>
-                    <version>1.4.9</version>
-                    <configuration>
-                        <repository>${docker.image.prefix}/${project.artifactId}</repository>
-                        <tag>${project.version}</tag>
-                    </configuration>
-                </plugin>
-
-                <!--Unpack the built JAR for the docker file to build with it -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <id>unpack</id>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>unpack</goal>
-                            </goals>
-                            <configuration>
-                                <artifactItems>
-                                    <artifactItem>
-                                        <groupId>${project.groupId}</groupId>
-                                        <artifactId>${project.artifactId}</artifactId>
-                                        <version>${project.version}</version>
-                                    </artifactItem>
-                                </artifactItems>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </build>
+            <!--Unpack the built JAR for the docker file to build with it -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>${project.artifactId}</artifactId>
+                                    <version>${project.version}</version>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
